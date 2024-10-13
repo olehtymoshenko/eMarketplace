@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  catalog-api:
+    build:
+      args: 
+          - ARG BUILD_CONFIGURATION=Debug
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__CatalogDatabase=${CATALOG_API_DB:-Server=catalog-api-db;Port=5432;Database=catalog-api-database;User Id=catalog-api-app;Password=catalog-api-pass}
+    ports:
+      - "5100:8080"
+      - "5101:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  catalog-api-db: 
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=catalog-api-app
+      - POSTGRES_PASSWORD=catalog-api-pass
+      - POSTGRES_DB=catalog-api-database
+    volumes:
+      - catalog-api-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  catalog-api-db-data:

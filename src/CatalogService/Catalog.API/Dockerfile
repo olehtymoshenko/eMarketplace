@@ -24,7 +24,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["CatalogService/Catalog.API/Catalog.API.csproj", "CatalogService/Catalog.API/"]
 COPY ["CatalogService/Catalog.Business/Catalog.Business.csproj", "CatalogService/Catalog.Business/"]
-COPY ["CatalogService/Catalog.Data/Catalog.Data.csproj", "CatalogService/Catalog.Data/"]
+COPY ["CatalogService/Catalog.Persistence/Catalog.Persistence.csproj", "CatalogService/Catalog.Persistence/"]
 RUN dotnet restore "./CatalogService/Catalog.API/Catalog.API.csproj"
 
 COPY ./CatalogService ./CatalogService
