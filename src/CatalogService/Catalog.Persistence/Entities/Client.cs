@@ -16,9 +16,8 @@ public class Client : BaseEntity
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
 
-
-
+    public IEnumerable<Vehicle>? Vehicles { get; set; }
 }

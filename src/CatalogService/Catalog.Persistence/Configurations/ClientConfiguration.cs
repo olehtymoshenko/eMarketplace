@@ -8,5 +8,8 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
     public void Configure(EntityTypeBuilder<Client> builder)
     {
         // TODO: Override defaults
+
+        builder.Property(p => p.CreatedAt)
+            .HasDefaultValueSql("now() at time zone 'utc'");
     }
 }
