@@ -4,6 +4,7 @@ using Catalog.Persistence;
 using Catalog.Persistence.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Catalog.Persistence.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    partial class CatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241102192750_final version of client and vehicle entities")]
+    partial class finalversionofclientandvehicleentities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,80 +82,6 @@ namespace Catalog.Persistence.Migrations
                     b.ToTable("clients", (string)null);
                 });
 
-            modelBuilder.Entity("Catalog.Persistence.Entities.SaleEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer")
-                        .HasColumnName("client_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now() at time zone 'utc'");
-
-                    b.Property<DateTime>("DateEventEnd")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_event_end");
-
-                    b.Property<DateTime>("DateEventStart")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_event_start");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<uint>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
-                    b.HasKey("Id")
-                        .HasName("pk_sale_events");
-
-                    b.HasIndex("ClientId")
-                        .HasDatabaseName("ix_sale_events_client_id");
-
-                    b.ToTable("sale_events", (string)null);
-                });
-
-            modelBuilder.Entity("Catalog.Persistence.Entities.SaleEventVehicle", b =>
-                {
-                    b.Property<int>("SaleEventId")
-                        .HasColumnType("integer")
-                        .HasColumnName("sale_event_id");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("vehicle_id");
-
-                    b.Property<decimal>("Discount")
-                        .HasColumnType("decimal(4, 2)")
-                        .HasColumnName("discount");
-
-                    b.HasKey("SaleEventId", "VehicleId")
-                        .HasName("pk_sale_event_vehicle");
-
-                    b.HasIndex("VehicleId")
-                        .HasDatabaseName("ix_sale_event_vehicle_vehicle_id");
-
-                    b.ToTable("sale_event_vehicle", (string)null);
-                });
-
             modelBuilder.Entity("Catalog.Persistence.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -215,39 +144,6 @@ namespace Catalog.Persistence.Migrations
                     b.ToTable("vehicles", (string)null);
                 });
 
-            modelBuilder.Entity("Catalog.Persistence.Entities.SaleEvent", b =>
-                {
-                    b.HasOne("Catalog.Persistence.Entities.Client", "Client")
-                        .WithMany("SaleEvents")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_sale_events_clients_client_id");
-
-                    b.Navigation("Client");
-                });
-
-            modelBuilder.Entity("Catalog.Persistence.Entities.SaleEventVehicle", b =>
-                {
-                    b.HasOne("Catalog.Persistence.Entities.SaleEvent", "SaleEvent")
-                        .WithMany("SaleEventVehicle")
-                        .HasForeignKey("SaleEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_sale_event_vehicle_sale_event_sale_event_id");
-
-                    b.HasOne("Catalog.Persistence.Entities.Vehicle", "Vehicle")
-                        .WithMany("SaleEventVehicle")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_sale_event_vehicle_vehicles_vehicle_id");
-
-                    b.Navigation("SaleEvent");
-
-                    b.Navigation("Vehicle");
-                });
-
             modelBuilder.Entity("Catalog.Persistence.Entities.Vehicle", b =>
                 {
                     b.HasOne("Catalog.Persistence.Entities.Client", "Client")
@@ -262,19 +158,7 @@ namespace Catalog.Persistence.Migrations
 
             modelBuilder.Entity("Catalog.Persistence.Entities.Client", b =>
                 {
-                    b.Navigation("SaleEvents");
-
                     b.Navigation("Vehicles");
-                });
-
-            modelBuilder.Entity("Catalog.Persistence.Entities.SaleEvent", b =>
-                {
-                    b.Navigation("SaleEventVehicle");
-                });
-
-            modelBuilder.Entity("Catalog.Persistence.Entities.Vehicle", b =>
-                {
-                    b.Navigation("SaleEventVehicle");
                 });
 #pragma warning restore 612, 618
         }

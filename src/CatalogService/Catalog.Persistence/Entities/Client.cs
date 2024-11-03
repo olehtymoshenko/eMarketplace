@@ -1,6 +1,8 @@
-﻿namespace Catalog.Persistence.Entities;
+﻿using Catalog.Persistence.Entities.Abstractions;
 
-public class Client : BaseEntity
+namespace Catalog.Persistence.Entities;
+
+public class Client : BaseEntity, IAuditableEntity
 {
     public string? Name { get; set; }
 
@@ -18,6 +20,10 @@ public class Client : BaseEntity
 
     public DateTime? UpdatedAt { get; set; }
 
+    public uint Version { get; set; }
+
 
     public IEnumerable<Vehicle>? Vehicles { get; set; }
+
+    public IEnumerable<SaleEvent>? SaleEvents { get; set; }
 }

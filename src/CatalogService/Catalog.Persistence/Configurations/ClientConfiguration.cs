@@ -7,9 +7,12 @@ internal class ClientConfiguration : IEntityTypeConfiguration<Client>
 {
     public void Configure(EntityTypeBuilder<Client> builder)
     {
-        // TODO: Override defaults
-
         builder.Property(p => p.CreatedAt)
-            .HasDefaultValueSql("now() at time zone 'utc'");
+            .HasDefaultValueSql("now() at time zone 'utc'")
+            .ValueGeneratedOnAdd()
+            .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
+        builder.Property(p => p.Version)
+            .IsRowVersion();
     }
 }

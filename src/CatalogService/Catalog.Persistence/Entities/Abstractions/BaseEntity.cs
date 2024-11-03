@@ -1,4 +1,4 @@
-﻿namespace Catalog.Persistence.Entities;
+﻿namespace Catalog.Persistence.Entities.Abstractions;
 
 public abstract class BaseEntity
 {

@@ -1,7 +1,8 @@
-﻿using Catalog.Persistence.Enums;
+﻿using Catalog.Persistence.Entities.Abstractions;
+using Catalog.Persistence.Enums;
 
 namespace Catalog.Persistence.Entities;
-public class Vehicle : BaseEntity
+public class Vehicle : BaseEntity, IAuditableEntity
 {
     public string? Name { get; set; }
 
@@ -9,7 +10,7 @@ public class Vehicle : BaseEntity
 
     public decimal? Price { get; set; }
 
-    public string? Propeprties { get; set; }
+    public string? Properties { get; set; }
 
     public int Quantity { get; set; }
 
@@ -19,9 +20,12 @@ public class Vehicle : BaseEntity
 
     public DateTime? UpdatedAt { get; set; }
 
+    public uint Version { get; set; }
 
 
-    public int VehicleId { get; set; }
-
+    public int ClientId { get; set; }
     public Client? Client { get; set; }
+
+    public List<SaleEventVehicle> SaleEventVehicle { get; set; } = [];
+    public List<SaleEvent> SaleEvents { get; set; } = [];
 }

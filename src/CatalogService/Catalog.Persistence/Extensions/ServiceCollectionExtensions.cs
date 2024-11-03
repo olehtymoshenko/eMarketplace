@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
-using System.Reflection;
 
 namespace Catalog.Persistence.Extensions;
 public static class ServiceCollectionExtensions
@@ -21,6 +20,7 @@ public static class ServiceCollectionExtensions
         var a = typeof(CatalogDbContext).Assembly.GetName().Name;
         services.AddDbContextPool<CatalogDbContext>(opt =>
         {
+            opt.UseSnakeCaseNamingConvention();
             opt.UseNpgsql(dataSourceBuilder.Build(), opt =>
             {
                 //opt.MigrationsAssembly(typeof(CatalogDbContext).Assembly.GetName().Name);
@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
 
         services.TryAddScoped<IClientRepository, ClientRepository>();
         services.TryAddScoped<IVehicleRepository, VehicleRepository>();
+        services.TryAddScoped<ISaleEventRepository, SaleEventRepository>();
 
         return services;
     }

@@ -1,21 +1,21 @@
-﻿using Catalog.Persistence.Entities;
+﻿using Catalog.Persistence.Entities.Abstractions;
 
 namespace Catalog.Persistence.Repositories.Abstractions;
 public interface IGenericRepository<TEntity> where TEntity : BaseEntity
 {
     Task<int> SaveChangesAsync();
 
-    Task<IEnumerable<TEntity>> GetAllAsync();
+    Task<IEnumerable<TEntity>> GetAllAsync(int pageSize, int pageNumber);
 
     Task<TEntity?> GetByIdAsync(int id);
 
-    void Add(TEntity entity);
+    Task<int> AddAsync(TEntity entity, bool persistChanges = true);
 
-    void AddRange(IEnumerable<TEntity> entities);
+    Task<int> AddRangeAsync(IEnumerable<TEntity> entities, bool persistChanges = true);
 
-    void Update(TEntity entity);
+    Task<int> UpdateAsync(TEntity entity, bool persistChanges = true);
 
-    void Delete(TEntity entity);
+    Task<int> DeleteAsync(TEntity entity, bool persistChanges = true);
 
     IQueryable<TEntity> Query();
 }
