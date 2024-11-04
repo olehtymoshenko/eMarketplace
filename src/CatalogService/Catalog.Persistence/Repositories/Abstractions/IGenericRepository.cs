@@ -3,6 +3,8 @@
 namespace Catalog.Persistence.Repositories.Abstractions;
 public interface IGenericRepository<TEntity> where TEntity : BaseEntity
 {
+    public CatalogDbContext DbContext { get; }
+
     Task<int> SaveChangesAsync();
 
     Task<IEnumerable<TEntity>> GetAllAsync(int pageSize, int pageNumber);

@@ -30,6 +30,7 @@ public class PresentationLayerProfile : Profile
         CreateMap<UpdateSaleEventRequest, SaleEvent>();
         CreateMap<DeleteSaleEventRequest, SaleEvent>();
         CreateMap<SaleEvent, SaleEventDto>();
+        CreateMap<SaleEvent, GetVehiclesInSaleEventResponse>();
 
     }
 }

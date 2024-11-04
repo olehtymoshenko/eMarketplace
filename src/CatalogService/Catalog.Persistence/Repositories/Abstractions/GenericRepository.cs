@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Catalog.Persistence.Repositories.Abstractions;
 public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
 {
-
-    protected CatalogDbContext DbContext { get; }
+    public CatalogDbContext DbContext { get; }
     protected DbSet<TEntity> Entities { get; }
 
     public GenericRepository(CatalogDbContext dbContext)

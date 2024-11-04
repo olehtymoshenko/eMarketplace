@@ -16,6 +16,10 @@ public class CatalogDbContext : DbContext
 
     public DbSet<Vehicle> Vehicles { get; set; }
 
+    public DbSet<SaleEvent> SaleEvents { get; set; }
+
+    public DbSet<SaleEventVehicle> SaleEventVehicles { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

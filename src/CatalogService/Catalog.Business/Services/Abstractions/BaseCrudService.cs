@@ -41,7 +41,7 @@ public class BaseCrudService<TEntity> : ICrudService<TEntity>
         {
             return null;
         }
-        
+
         return (await GenericRepository.UpdateAsync(entity)) > 0 ? entity : null;
     }
 
