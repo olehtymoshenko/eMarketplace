@@ -12,6 +12,9 @@ services:
       
   catalog-api-db: 
     image: postgres
+  
+  seq:
+    image: datalust/seq
 
 
 

@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "catalog-api": "StartDebugging",
-        "catalog-api-db": "StartWithoutDebugging"
+        "catalog-api-db": "StartWithoutDebugging",
+        "seq": "StartWithoutDebugging"
       }
     },
     "MigrationsManagement": {
@@ -13,7 +14,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "catalog-api": "DoNotStart",
-        "catalog-api-db": "StartWithoutDebugging"
+        "catalog-api-db": "StartWithoutDebugging",
+        "seq": "StartWithoutDebugging"
       }
     }
   }
