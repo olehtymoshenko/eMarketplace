@@ -27,4 +27,17 @@ public class VehiclesController : BaseCrudController<Vehicle, VehicleDto, Create
         return vehicles != null ? Ok(Mapper.Map<List<VehicleDto>>(vehicles)) : Ok();
     }
 
+
+    [HttpPost("client/{clientId:int}/bulk-upload-csv")]
+    public async Task<IActionResult> BulkVehiclesUploadFromCsv(int clientId, IFormFile vehiclesAsFile)
+    {
+        using var ms = new MemoryStream();
+        using var file = vehiclesAsFile.OpenReadStream();
+        file.CopyTo(ms);
+        ms.Position = 0;
+
+        var uploadedVehiclesNumber = await _vehiclesService.BulkVehiclesUploadFromCsvAsync(ms, clientId);
+
+        return uploadedVehiclesNumber > 0 ? Ok(uploadedVehiclesNumber) : StatusCode(500);
+    }
 }

@@ -10,5 +10,7 @@ public record GetVehiclesInSaleEventResponse(
     DateTime CreatedAt,
     DateTime? UpdatedAt,
     uint Version,
-    int ClientId,
-    IList<VehicleDto> Vehicles);
+    int ClientId)
+{
+    public IEnumerable<VehicleDto> Vehicles { get; init; } = [];
+}

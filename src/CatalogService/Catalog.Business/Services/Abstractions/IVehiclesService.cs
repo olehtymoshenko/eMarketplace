@@ -4,4 +4,6 @@ namespace Catalog.Business.Services.Abstractions;
 public interface IVehiclesService : ICrudService<Vehicle>
 {
     Task<IEnumerable<Vehicle>> GetVehiclesByClientAsync(int clientId);
+
+    Task<int> BulkVehiclesUploadFromCsvAsync(MemoryStream file, int clientId);
 }

@@ -23,17 +23,17 @@ public class SaleEventsController : BaseCrudController<SaleEvent, SaleEventDto, 
         Logger = logger;
     }
 
-    [HttpGet("{id:int}/vehicles")]
-    public async Task<IActionResult> GetVehiclesInSaleEvent(int id, [FromQuery]PaginationQuery paginationQuery)
+    [HttpGet("{saleEventId:int}/vehicles")]
+    public async Task<IActionResult> GetVehiclesInSaleEvent(int saleEventId, [FromQuery]PaginationQuery paginationQuery)
     {
-        var saleEventWithVehicles = await SaleEventsService.GetVehiclesInSaleEventAsync(id, paginationQuery ?? new());
+        var saleEventWithVehicles = await SaleEventsService.GetVehiclesInSaleEventAsync(saleEventId, paginationQuery ?? new());
 
-        var result = Mapper.Map<List<GetVehiclesInSaleEventResponse>>(saleEventWithVehicles);
+        var result = Mapper.Map<GetVehiclesInSaleEventResponse>(saleEventWithVehicles);
 
         return result != null ? Ok(result) : BadRequest();
     }
 
-    [HttpPost("{id:int}/vehicles")]
+    [HttpPost("{saleEventId:int}/vehicles")]
     public async Task<IActionResult> AssignVehiclesToSaleEvent(int saleEventId, AssignVehiclesToSaleEventRequest request)
     {
         var vehiclesToBeAssignedToSaleEvent=  request.Vehicles.Select(x => new SaleEventVehicle()
