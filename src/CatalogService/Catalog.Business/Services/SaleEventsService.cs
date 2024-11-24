@@ -1,10 +1,9 @@
-﻿using Catalog.Business.Models;
-using Catalog.Business.Services.Abstractions;
+﻿using Catalog.Business.Services.Abstractions;
+using Catalog.Common.Models;
+using Catalog.Common.Result;
 using Catalog.Persistence.Entities;
-using Catalog.Persistence.Repositories;
 using Catalog.Persistence.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Catalog.Business.Services;
 public class SaleEventsService(ISaleEventRepository SaleEventsRepository) : BaseCrudService<SaleEvent>(SaleEventsRepository), ISaleEventsService
@@ -12,11 +11,11 @@ public class SaleEventsService(ISaleEventRepository SaleEventsRepository) : Base
     /// <summary>
     /// Allows to assign multiple vehicles to one SaleEvent
     /// </summary>
-    public async Task<int> AssignVehiclesToSaleEventAsync(int saleEventId, IEnumerable<SaleEventVehicle> saleEventVehicles)
+    public async Task<Result<int>> AssignVehiclesToSaleEventAsync(int saleEventId, IEnumerable<SaleEventVehicle> saleEventVehicles)
     {
         if (saleEventVehicles == null || !saleEventVehicles.Any())
         {
-            return 0;
+            return Errors.RequestGenericError("List of provided vehicles is null or empty, or cannot be parsed");
         }
 
         var vehicleIds = saleEventVehicles.Select(x => x.VehicleId).ToList();
@@ -38,7 +37,7 @@ public class SaleEventsService(ISaleEventRepository SaleEventsRepository) : Base
         return await SaleEventsRepository.SaveChangesAsync();
     }
 
-    public async Task<SaleEvent> GetVehiclesInSaleEventAsync(int saleEventId, PaginationQuery paginationQuery)
+    public async Task<Result<SaleEvent?>> GetVehiclesInSaleEventAsync(int saleEventId, PaginationQuery paginationQuery)
     {
         return await SaleEventsRepository.Query()
             .AsNoTracking()
@@ -47,6 +46,6 @@ public class SaleEventsService(ISaleEventRepository SaleEventsRepository) : Base
                             .OrderBy(x => x.Id)
                             .Skip(paginationQuery.PageSize * (paginationQuery.PageNumber - 1))
                             .Take(paginationQuery.PageSize))
-            .FirstAsync();
+            .FirstOrDefaultAsync();
     }
 }

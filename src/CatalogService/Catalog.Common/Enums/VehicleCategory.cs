@@ -1,4 +1,4 @@
-﻿namespace Catalog.Persistence.Enums;
+﻿namespace Catalog.Common.Enums;
 public enum VehicleCategory
 {
     None,

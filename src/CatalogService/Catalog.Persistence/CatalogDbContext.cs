@@ -1,7 +1,7 @@
-﻿using Catalog.Persistence.Configurations;
+﻿using Catalog.Common.Enums;
+using Catalog.Persistence.Configurations;
 using Catalog.Persistence.Entities;
 using Catalog.Persistence.Entities.Abstractions;
-using Catalog.Persistence.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Persistence;

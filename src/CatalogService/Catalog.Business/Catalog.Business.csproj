@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Catalog.Persistence\Catalog.Persistence.csproj" />
+    <ProjectReference Include="..\Catalog.Common\Catalog.Common.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

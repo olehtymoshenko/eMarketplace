@@ -1,45 +1,49 @@
-﻿using System.Reflection;
+﻿using Catalog.Common.Result;
+using System.Reflection;
 using System.Text;
 
-namespace Catalog.Business.Utils;
+namespace Catalog.Common.Utils;
 public static class CsvReader
 {
     const char TextQualifier = '"';
 
-    public static List<T> ReadFromCsv<T>(MemoryStream csv, int rowsNumberToRead = int.MaxValue, char columnsDelimiter = ',') where T : new()
+    /// <summary>
+    /// Parse csv file passed as memory stream into a list of objects of type <typeparamref name="T"/>.
+    /// Text qualifier is '"' character. 
+    /// </summary>
+    /// <remarks>
+    /// Method will throw rethrow an inner exception if it occurs
+    /// </remarks>
+    /// <param name="csv">Csv file as memory stream. Header row is mandatory!</param>
+    /// <param name="rowsNumberToRead">Number of rows to read</param>
+    /// <param name="columnsDelimiter">Character that denotes a column delimiter</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static Result<List<T>> ReadFromCsv<T>(MemoryStream csv, int rowsNumberToRead = int.MaxValue, char columnsDelimiter = ',') where T : new()
     {
         var results = new List<T>();
 
         // Validation
         if (csv == null || csv.Length <= 3) // 3 - the least amount of characters required for potentially valid csv file
         {
-            throw new ArgumentException("Invalid csv file");
+            return Errors.RequestGenericError("The provided csv file is null, empty or invalid");
         }
 
-        var streamReader = new StreamReader(csv, Encoding.UTF8);
+        using var streamReader = new StreamReader(csv, Encoding.UTF8);
 
-        try
+        // Extract list of columns
+        var headers = streamReader.ReadLine() ?? "";
+        var fieldsNameNormalized = ExtractColumns(headers, columnsDelimiter)
+            .Select(x => string.IsNullOrWhiteSpace(x) ? string.Empty : x.ToLower())
+            .ToList();
+
+        // Parse rows
+        while (rowsNumberToRead-- > 0 && !streamReader.EndOfStream)
         {
+            var values = ExtractColumns(streamReader.ReadLine() ?? "", columnsDelimiter);
 
-            // Build model
-            var headers = streamReader.ReadLine() ?? "";
-            var fieldsNameNormalized = ExtractColumns(headers, columnsDelimiter)
-                .Select(x => string.IsNullOrWhiteSpace(x) ? string.Empty : x.ToLower())
-                .ToList();
-
-            // parse row
-            while (rowsNumberToRead-- > 0 && !streamReader.EndOfStream)
-            {
-                var values = ExtractColumns(streamReader.ReadLine() ?? "", columnsDelimiter);
-
-                var newObject = BuildObject<T>(fieldsNameNormalized, values);
-                results.Add(newObject);
-            }
-        }
-        catch (Exception)
-        {
-            // log
-            return default!;
+            var newObject = BuildObject<T>(fieldsNameNormalized, values);
+            results.Add(newObject);
         }
 
         return results;

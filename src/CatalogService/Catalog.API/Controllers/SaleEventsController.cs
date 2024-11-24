@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using Catalog.API.Contract.SaleEventsController.Requests;
 using Catalog.API.Contract.SaleEventsController.Responses;
-using Catalog.Business.Models;
+using Catalog.API.Mapping;
 using Catalog.Business.Services.Abstractions;
+using Catalog.Common.Models;
 using Catalog.Persistence.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,27 +25,29 @@ public class SaleEventsController : BaseCrudController<SaleEvent, SaleEventDto, 
     }
 
     [HttpGet("{saleEventId:int}/vehicles")]
-    public async Task<IActionResult> GetVehiclesInSaleEvent(int saleEventId, [FromQuery]PaginationQuery paginationQuery)
+    public async Task<IResult> GetVehiclesInSaleEvent(int saleEventId, [FromQuery]PaginationQuery paginationQuery)
     {
-        var saleEventWithVehicles = await SaleEventsService.GetVehiclesInSaleEventAsync(saleEventId, paginationQuery ?? new());
+        var saleEventWithVehiclesResult = await SaleEventsService.GetVehiclesInSaleEventAsync(saleEventId, paginationQuery ?? new());
 
-        var result = Mapper.Map<GetVehiclesInSaleEventResponse>(saleEventWithVehicles);
-
-        return result != null ? Ok(result) : BadRequest();
+        return saleEventWithVehiclesResult.Match(
+            value => value != default ? Results.Ok(Mapper.Map<GetVehiclesInSaleEventResponse>(value)) : Results.Ok(),
+            err => err.MapToResponse());
     }
 
     [HttpPost("{saleEventId:int}/vehicles")]
-    public async Task<IActionResult> AssignVehiclesToSaleEvent(int saleEventId, AssignVehiclesToSaleEventRequest request)
+    public async Task<IResult> AssignVehiclesToSaleEvent(int saleEventId, AssignVehiclesToSaleEventRequest request)
     {
-        var vehiclesToBeAssignedToSaleEvent=  request.Vehicles.Select(x => new SaleEventVehicle()
+        var vehiclesToBeAssignedToSaleEvent = request.Vehicles.Select(x => new SaleEventVehicle()
         {
             Discount = x.DiscountPercent,
             VehicleId = x.VehicleId,
             SaleEventId = saleEventId
         });
 
-        var affectedRows = await SaleEventsService.AssignVehiclesToSaleEventAsync(saleEventId, vehiclesToBeAssignedToSaleEvent);
+        var affectedRowsResult = await SaleEventsService.AssignVehiclesToSaleEventAsync(saleEventId, vehiclesToBeAssignedToSaleEvent);
 
-        return Ok(affectedRows);
+        return affectedRowsResult.Match(
+            value => Results.Ok(affectedRowsResult),
+            err => err.MapToResponse());
     }
 }

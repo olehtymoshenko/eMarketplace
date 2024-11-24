@@ -1,5 +1,5 @@
-﻿using System;
-using Catalog.Persistence.Enums;
+﻿#pragma warning disable 8981
+using Catalog.Common.Enums;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 

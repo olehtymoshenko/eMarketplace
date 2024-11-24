@@ -1,7 +1,7 @@
-﻿using Catalog.Persistence.Enums;
+﻿using Catalog.Common.Enums;
 
 namespace Catalog.Business.Models;
-internal class VehicleCsvModel
+public class VehicleCsvModel
 {
     public string? Name { get; set; }
 

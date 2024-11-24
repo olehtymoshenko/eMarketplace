@@ -1,4 +1,4 @@
-﻿using Catalog.Persistence.Enums;
+﻿using Catalog.Common.Enums;
 
 namespace Catalog.API.Contract.VehiclesController.Responses;
 

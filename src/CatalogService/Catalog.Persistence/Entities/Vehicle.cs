@@ -1,5 +1,5 @@
-﻿using Catalog.Persistence.Entities.Abstractions;
-using Catalog.Persistence.Enums;
+﻿using Catalog.Common.Enums;
+using Catalog.Persistence.Entities.Abstractions;
 
 namespace Catalog.Persistence.Entities;
 public class Vehicle : BaseEntity, IAuditableEntity

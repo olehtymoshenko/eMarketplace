@@ -1,8 +1,7 @@
-﻿using Catalog.Persistence.Enums;
+﻿using Catalog.Common.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Npgsql;
-using System.Reflection;
 
 namespace Catalog.Persistence;
 internal class CatalogDbContextFactory : IDesignTimeDbContextFactory<CatalogDbContext>

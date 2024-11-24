@@ -1,4 +1,5 @@
-﻿using Catalog.Persistence.Entities.Abstractions;
+﻿using Catalog.Common.Result;
+using Catalog.Persistence.Entities.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Persistence.Repositories.Abstractions;
@@ -25,7 +26,7 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
 
     public async Task<TEntity?> GetByIdAsync(int id)
     {
-        if(id < 0) throw new ArgumentNullException(nameof(id));
+        if(id < 0) throw new ArgumentException($"Argument {nameof(id)} is less than zero in {nameof(GenericRepository<TEntity>)}.{nameof(GetAllAsync)}");
 
         return await Entities.FindAsync(id);
     }
@@ -54,11 +55,12 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
 
     public async Task<int> DeleteAsync(TEntity entity, bool persistChanges = true)
     {
-        if (entity == null)
-            throw new ArgumentNullException(nameof(entity));
+        if (entity == null) throw new ArgumentNullException(nameof(entity));
+
         Entities.Remove(entity);
         return persistChanges ? (await DbContext.SaveChangesAsync()) : 0;
     }
+
     public async Task<int> UpdateAsync(TEntity entity, bool persistChanges = true)
     {
         if (entity == null) throw new ArgumentNullException(nameof(entity));

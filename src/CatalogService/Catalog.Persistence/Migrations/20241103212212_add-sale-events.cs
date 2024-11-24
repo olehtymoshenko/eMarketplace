@@ -1,4 +1,4 @@
-﻿using System;
+﻿#pragma warning disable 8981
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 

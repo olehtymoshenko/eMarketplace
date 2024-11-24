@@ -1,10 +1,11 @@
-﻿using Catalog.Business.Models;
+﻿using Catalog.Common.Models;
+using Catalog.Common.Result;
 using Catalog.Persistence.Entities;
 
 namespace Catalog.Business.Services.Abstractions;
 public interface ISaleEventsService : ICrudService<SaleEvent>
 {
-    Task<SaleEvent> GetVehiclesInSaleEventAsync(int saleEventId, PaginationQuery paginationQuery);
+    Task<Result<SaleEvent?>> GetVehiclesInSaleEventAsync(int saleEventId, PaginationQuery paginationQuery);
 
-    Task<int> AssignVehiclesToSaleEventAsync(int saleEventId, IEnumerable<SaleEventVehicle> saleEventVehicles);
+    Task<Result<int>> AssignVehiclesToSaleEventAsync(int saleEventId, IEnumerable<SaleEventVehicle> saleEventVehicles);
 }

@@ -1,4 +1,5 @@
-﻿using Catalog.Business.Models;
+﻿using Catalog.Common.Models;
+using Catalog.Common.Result;
 using Catalog.Persistence.Entities.Abstractions;
 using Catalog.Persistence.Repositories.Abstractions;
 
@@ -13,45 +14,49 @@ public class BaseCrudService<TEntity> : ICrudService<TEntity>
         GenericRepository = genericRepository;
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(PaginationQuery paginationQuery)
+    public async Task<Result<IEnumerable<TEntity>>> GetAllAsync(PaginationQuery paginationQuery)
     {
         var resourceCollection = await GenericRepository.GetAllAsync(paginationQuery.PageSize, paginationQuery.PageNumber);
-        return resourceCollection ?? Array.Empty<TEntity>();
+
+        return Result<IEnumerable<TEntity>>.Success(resourceCollection);
     }
 
-    public async Task<TEntity?> GetByIdAsync(int id)
+    public async Task<Result<TEntity?>> GetByIdAsync(int id)
     {
         var resource = await GenericRepository.GetByIdAsync(id);
-        return resource ?? null;
+
+        return resource;
     }
 
-    public async Task<TEntity?> CreateAsync(TEntity entity)
+    public async Task<Result<TEntity?>> CreateAsync(TEntity entity)
     {
         if (entity == null)
         {
-            return null;
+            return Errors.RequestGenericError("The object model in the request is null or empty");
         }
 
-        return (await GenericRepository.AddAsync(entity)) > 0 ? entity : null;
+        return (await GenericRepository.AddAsync(entity)) > 0 ? entity : Errors.RequestGenericError("Failed to create a new entity");
     }
 
-    public async Task<TEntity?> UpdateAsync(int id, TEntity entity)
+    public async Task<Result<TEntity?>> UpdateAsync(int id, TEntity entity)
     {
         if (id <= 0 || entity == null || entity.Id != id)
         {
-            return null;
+            return Errors.RequestGenericError("The object id in the body is less than 1, or object is null/empty, or object id in the request body doesn't match id in the URL");
         }
 
-        return (await GenericRepository.UpdateAsync(entity)) > 0 ? entity : null;
+        return (await GenericRepository.UpdateAsync(entity)) > 0 ? entity : Errors.ServerInternalError;
     }
 
-    public async Task<int> DeleteAsync(int id, TEntity entity)
+    public async Task<Result<int>> DeleteAsync(int id, TEntity entity)
     {
         if (entity == null || entity.Id <= 0 || entity.Id != id)
         {
-            return 0;
+            return Errors.RequestGenericError("The object id is less than 0, or object is null/empty or object id in the request body doesn't match id in the URL");
         }
 
-       return await GenericRepository.DeleteAsync(entity);
+        var recordsDeleted = await GenericRepository.DeleteAsync(entity);
+
+        return recordsDeleted > 0 ? recordsDeleted : Errors.ServerInternalError;
     }
 }

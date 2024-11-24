@@ -1,6 +1,7 @@
 ﻿using Catalog.Business.Models;
 using Catalog.Business.Services.Abstractions;
-using Catalog.Business.Utils;
+using Catalog.Common.Result;
+using Catalog.Common.Utils;
 using Catalog.Persistence.Entities;
 using Catalog.Persistence.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +11,27 @@ public class VehiclesService(IVehicleRepository VehicleRepository) : BaseCrudSer
 {
 
     // TODO Pagination
-    public  async Task<IEnumerable<Vehicle>> GetVehiclesByClientAsync(int clientId)
+    public  async Task<Result<IEnumerable<Vehicle>>> GetVehiclesByClientAsync(int clientId)
     {
          return await VehicleRepository.Query().Where(x => x.ClientId == clientId).ToListAsync();
     }
 
 
-    public async Task<int> BulkVehiclesUploadFromCsvAsync(MemoryStream csv, int clientId)
+    public async Task<Result<int>> BulkVehiclesUploadFromCsvAsync(MemoryStream csv, int clientId)
     {
         var vehiclesCsvModel = CsvReader.ReadFromCsv<VehicleCsvModel>(csv);
 
-        var newVehicles = vehiclesCsvModel.Select(x => new Vehicle()
+        if(vehiclesCsvModel.IsFailure)
+        {
+            return vehiclesCsvModel.Error;
+        }
+
+        if(vehiclesCsvModel.Value == null || vehiclesCsvModel.Value.Count == 0)
+        {
+            return Errors.RequestGenericError("Unable to extract any records from the provided .CSV file. Please ensure it's valid");
+        }
+
+        var newVehicles = vehiclesCsvModel.Value.Select(x => new Vehicle()
         {
             Name = x.Name,
             Description = x.Description,

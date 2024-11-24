@@ -1,4 +1,4 @@
-﻿namespace Catalog.Business.Models;
+﻿namespace Catalog.Common.Models;
 
 public class PaginationQuery
 {
