@@ -5,14 +5,23 @@ using System.Text;
 namespace Catalog.Common.Utils;
 public static class CsvReader
 {
-    const char TextQualifier = '"';
+    /// <summary>
+    /// It is a character that denotes string that will be considered as a single column, not parsed into multiple if there are 
+    /// any column delimiters within it
+    /// </summary>
+    public const char TextQualifier = '"';
 
     /// <summary>
-    /// Parse csv file passed as memory stream into a list of objects of type <typeparamref name="T"/>.
-    /// Text qualifier is '"' character. 
+    /// Parse a csv file passed as memory stream into a list of objects of type <typeparamref name="T"/>.
     /// </summary>
     /// <remarks>
-    /// Method will throw rethrow an inner exception if it occurs
+    /// <para>
+    ///     Value of a text qualifier is stored in <see cref="TextQualifier"/>
+    /// </para>
+    /// 
+    /// <para>
+    ///     Method will throw an inner exception if it occurs
+    /// </para>
     /// </remarks>
     /// <param name="csv">Csv file as memory stream. Header row is mandatory!</param>
     /// <param name="rowsNumberToRead">Number of rows to read</param>
@@ -23,10 +32,14 @@ public static class CsvReader
     {
         var results = new List<T>();
 
-        // Validation
-        if (csv == null || csv.Length <= 3) // 3 - the least amount of characters required for potentially valid csv file
+        var validationResult = ValidateInputCsv(csv);
+        if (validationResult.IsFailure)
         {
-            return Errors.RequestGenericError("The provided csv file is null, empty or invalid");
+            return validationResult.Error switch
+            {
+                Error => validationResult.Error,
+                _ => Errors.ServerInternalError
+            };
         }
 
         using var streamReader = new StreamReader(csv, Encoding.UTF8);
@@ -49,6 +62,16 @@ public static class CsvReader
         return results;
     }
 
+    private static ResultVoid ValidateInputCsv(MemoryStream csv)
+    {
+        if (csv == null || csv.Length <= 3) // 3 - the least amount of characters required for potentially valid csv file
+        {
+            return ResultVoid.FailureVoid(Errors.RequestGenericError("The provided csv file is null, empty or invalid"));
+        }
+
+        return ResultVoid.SuccessVoid();
+    }
+
     private static T BuildObject<T>(List<string> headers, List<string> values) where T : new()
     {
         var isntanceType = typeof(T);
@@ -67,7 +90,6 @@ public static class CsvReader
             }
         }
 
-
         return instance;
     }
 
@@ -77,73 +99,39 @@ public static class CsvReader
         {
             Type targetType = type;
 
-            if (targetType == typeof(string))
+            var resultsForTypesWithoutConversion = HandleTypesThatDoNotNeedConversion(value, targetType);
+            if (resultsForTypesWithoutConversion.isSuccessfull)
             {
-                convertedValue = value;
+                convertedValue = resultsForTypesWithoutConversion.convertedValue!;
                 return true;
             }
 
-            if (string.IsNullOrWhiteSpace(value))
+            targetType = TryExtractUnderlyingTypeFromNullableTypes(targetType);
+
+
+            var resultsForTryParseMethod = TryConvertUsingTryParseMethod(value, targetType);
+            if (resultsForTryParseMethod.isSuccessfull)
             {
-                convertedValue = value;
-                return false;
+                convertedValue = resultsForTryParseMethod.convertedValue!;
+                return true;
             }
 
-            // Nullable
-            var nullableType = targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            if (nullableType)
+
+            var resultsForEnumTypeConversion = TryConvertEnumTypes(value, type);
+            if (resultsForEnumTypeConversion.isSuccessfull)
             {
-                var underlyingNullableType = Nullable.GetUnderlyingType(targetType);
-                if (underlyingNullableType == default)
-                {
-                    convertedValue = value;
-                    return false;
-                }
-
-                targetType = underlyingNullableType;
-            }
-
-            // Try use TryParse if available
-            Type[] argTypes = [typeof(string), targetType.MakeByRefType()];
-            var tryParseMethod = targetType.GetMethod("TryParse", argTypes); // for most of the default types
-            if (tryParseMethod != null)
-            {
-                object[] args = [value, null!];
-                var parseResult = (bool)tryParseMethod.Invoke(null, args)!;
-                if (parseResult) // successfull parse
-                {
-                    convertedValue = args[1];
-                    return true;
-                }
-            }
-
-            // Handle enums (number to enum value)
-            if (type.IsEnum)
-            {
-                try
-                {
-
-                    if (int.TryParse(value, out int res))
-                    {
-                        var enumObject = Enum.ToObject(type, res);
-                        convertedValue = enumObject;
-                        return true;
-                    }
-                }
-                catch
-                {
-                    convertedValue = default!;
-                    return false;
-                }
+                convertedValue = resultsForEnumTypeConversion.convertedValue!;
+                return true;
             }
 
             // Try use Convertor (IConvertable IF)
-            var convesionResult = Convert.ChangeType(value, targetType);
-            if (convesionResult != null)
+            var resultsForTypesImplementingIConvertable = TryConvertUsingIConvertableInterface(value, targetType);
+            if (resultsForTypesImplementingIConvertable.isSuccessfull)
             {
-                convertedValue = convesionResult;
+                convertedValue = resultsForTypesImplementingIConvertable.convertedValue!;
                 return true;
             }
+
 
             convertedValue = default!;
             return false;
@@ -155,6 +143,95 @@ public static class CsvReader
         }
     }
 
+    private static (bool isSuccessfull, object? convertedValue) TryConvertUsingIConvertableInterface(string value, Type targetType)
+    {
+        try
+        {
+            var convesionResult = Convert.ChangeType(value, targetType);
+            if (convesionResult != null)
+            {
+                return (true, convesionResult);
+            }
+        }
+        catch
+        {
+            return (false, default);
+        }
+
+        return (false, default);
+    }
+
+    private static (bool isSuccessfull, object? convertedValue) TryConvertEnumTypes(string value, Type type)
+    {
+        if (!type.IsEnum)
+        {
+            return (false, default);
+        }
+
+        try
+        {
+            if (int.TryParse(value, out int res))
+            {
+                var enumObject = Enum.ToObject(type, res);
+                return (true, enumObject);
+            }
+        }
+        catch
+        {
+            return (false, default);
+        }
+
+        return (false, default);
+    }
+
+    private static (bool isSuccessfull, object? convertedValue) TryConvertUsingTryParseMethod(string value, Type targetType)
+    {
+        Type[] argTypes = [typeof(string), targetType.MakeByRefType()];
+        var tryParseMethod = targetType.GetMethod("TryParse", argTypes); // for most of the default types
+
+        if (tryParseMethod != null)
+        {
+            object[] args = [value, null!];
+            var parseResult = (bool)tryParseMethod.Invoke(null, args)!;
+            if (parseResult)
+            {
+                return (true, args[1]);
+            }
+        }
+
+        return (false, default);
+    }
+
+    private static Type TryExtractUnderlyingTypeFromNullableTypes(Type targetType)
+    {
+        var nullableType = targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>);
+        if (nullableType)
+        {
+            var underlyingNullableType = Nullable.GetUnderlyingType(targetType);
+            if (underlyingNullableType != default)
+            {
+                return underlyingNullableType;
+            }
+        }
+
+        return targetType;
+    }
+
+    private static (bool isSuccessfull, object? convertedValue) HandleTypesThatDoNotNeedConversion(string value, Type targetType)
+    {
+        if (targetType == typeof(string))
+        {
+            return (true, value);
+        }
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return (true, value);
+        }
+
+        return (false, default);
+    }
+
     private static List<string> ExtractColumns(string row, char delimiter)
     {
         var columns = new List<string>();
@@ -162,7 +239,7 @@ public static class CsvReader
         bool isOpenTextQualifier = false;
         int positionOfLastDelimiter = -1;
 
-        var rowNormalized = row.Trim();//.Replace("\\\"", "\"");
+        var rowNormalized = row.Trim();
 
         for (int i = 0; i < rowNormalized.Length; i++)
         {
@@ -170,7 +247,7 @@ public static class CsvReader
             {
                 if ((i - positionOfLastDelimiter) > 1)
                 {
-                    columns.Add(rowNormalized[(positionOfLastDelimiter + 1)..i].Trim('"').Replace("\"\"", "\"")); // extra code for JSON
+                    columns.Add(rowNormalized[(positionOfLastDelimiter + 1)..i].Trim('"').Replace("\"\"", "\"")); // replace to handle JSONs inside columns
                 }
                 else
                 {

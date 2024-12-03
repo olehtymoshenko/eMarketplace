@@ -25,7 +25,7 @@ public static class Errors
 
     #region Util methods
 
-    public static string ResolveProblemDetailType(int code) => $"https://domain.dev.com/help/errors/{code}";
+    public static string MapErrorCodeToUrlReferencingDocsAboutCode(int code) => $"https://domain.dev.com/help/errors/{code}";
 
     #endregion
 }

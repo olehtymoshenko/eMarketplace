@@ -15,7 +15,7 @@ public class GlobalExceptionHandler(IProblemDetailsService _problemDetailsServic
             {
                 Title = Errors.ServerInternalError.Title,
                 Detail = Errors.ServerInternalError.Details,
-                Type = Errors.ResolveProblemDetailType(Errors.ServerInternalError.Code),
+                Type = Errors.MapErrorCodeToUrlReferencingDocsAboutCode(Errors.ServerInternalError.Code),
                 Status = (int)HttpStatusCode.InternalServerError
             }
         };

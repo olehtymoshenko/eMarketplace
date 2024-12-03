@@ -2,6 +2,10 @@
 
 namespace Catalog.API.Utils;
 
+/// <summary>
+/// The purpose is to export to the documentation (openapi.json) name of URLs and paraters as "my-sample-endpoint"
+/// and not like 'MySampleEndpoint'
+/// </summary>
 public class KebabNamingParameterTransformer : IOutboundParameterTransformer
 {
     public string? TransformOutbound(object? value)

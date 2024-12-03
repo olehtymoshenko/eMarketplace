@@ -19,13 +19,13 @@ public static class ResultToResponseExtensions
                 errors: err.ModelStateErrors, 
                 detail: err.Details, 
                 title: err.Title, 
-                type: Errors.ResolveProblemDetailType(err.Code)),
+                type: Errors.MapErrorCodeToUrlReferencingDocsAboutCode(err.Code)),
 
             RequestError => Results.Problem(new ProblemDetails()
             {
                 Title = error.Title,
                 Detail = error.Details,
-                Type = Errors.ResolveProblemDetailType(error.Code),
+                Type = Errors.MapErrorCodeToUrlReferencingDocsAboutCode(error.Code),
                 Status = (int)HttpStatusCode.BadRequest
             }),
 
@@ -33,7 +33,7 @@ public static class ResultToResponseExtensions
             {
                 Title = error.Title,
                 Detail = error.Details,
-                Type = Errors.ResolveProblemDetailType(error.Code),
+                Type = Errors.MapErrorCodeToUrlReferencingDocsAboutCode(error.Code),
                 Status = (int)HttpStatusCode.InternalServerError
             })
         };
