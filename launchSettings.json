@@ -9,7 +9,7 @@
         "seq": "StartWithoutDebugging"
       }
     },
-    "MigrationsManagement": {
+    "DependencyServicesOnly": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
