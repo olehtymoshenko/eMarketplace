@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.API.Controllers;
 
+/// <summary>
+/// This is the controller to manage vehicles
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class VehiclesController : BaseCrudController<Vehicle, VehicleDto, CreateVehicleRequest, UpdateVehicleRequest, DeleteVehicleRequest>
@@ -20,6 +23,14 @@ public class VehiclesController : BaseCrudController<Vehicle, VehicleDto, Create
     }
 
 
+    /// <summary>
+    /// Get all products by a client id.
+    /// </summary>
+    /// <remarks>
+    /// Some remarks about this endpoint
+    /// </remarks>
+    /// <param name="id">This is a client id, integed</param>
+    /// <returns>It returns a list of products</returns>
     [HttpGet("client/{id:int}")]
     public async Task<IResult> GetProductsByClient(int id)
     {
