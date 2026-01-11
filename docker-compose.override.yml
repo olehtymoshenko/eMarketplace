@@ -2,7 +2,7 @@ services:
   catalog-api:
     build:
       args: 
-          - ARG BUILD_CONFIGURATION=Debug
+        - ARG BUILD_CONFIGURATION=Debug
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
@@ -38,9 +38,38 @@ services:
       - 5341:80
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
     volumes:
       - catalog-api-logs:/data
-    
+  
+  keycloak:
+    command: ["start-dev"]
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=keycloak-db
+      - KC_DB_USERNAME=keycloak-db-app
+      - KC_DB_PASSWORD=keycloak-db-pass
+      
+    ports:
+      - 8080:8080
+
+  keycloak-db: 
+    image: postgres
+    environment:
+      - POSTGRES_USER=keycloak-db-app
+      - POSTGRES_PASSWORD=keycloak-db-pass
+      - POSTGRES_DB=keycloak
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   catalog-api-db-data:
-  catalog-api-logs:  
+  keycloak-db-data:
+  catalog-api-logs:

@@ -1,12 +1,11 @@
+using Catalog.API.Extensions;
 using Catalog.API.Middleware;
 using Catalog.API.Utils;
 using Catalog.Business.Extensions;
 using Catalog.Persistence.Extensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Scalar.AspNetCore;
 using Serilog;
-using System.Reflection;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
@@ -37,6 +36,7 @@ try
 
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+    builder.Services.AddAuth(builder.Configuration);
     builder.Services.AddBusinessLayer();
     builder.Services.AddPersistence(builder.Configuration);
 
@@ -51,37 +51,24 @@ try
         options.Conventions.Add(new RouteTokenTransformerConvention(new KebabNamingParameterTransformer()));
     });
 
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.AddOpenApiGeneration();
 
-    var app = builder.Build();
-
-    app.UseExceptionHandler();
 
     // Configure the HTTP request pipeline.
+    var app = builder.Build();
+    
+    app.UseExceptionHandler();
     if (app.Environment.IsDevelopment())
     {
-
-        app.UseSwagger(opt =>
-        {
-            opt.RouteTemplate = "/openapi/{documentName}.json";
-        });
-        app.MapScalarApiReference(opt =>
-        {
-            opt.Title = Assembly.GetExecutingAssembly()?.GetName()?.Name ?? "Mock title";
-            opt.DarkMode = true;
-            opt.EnabledTargets = [ScalarTarget.CSharp, ScalarTarget.Http, ScalarTarget.Shell, ScalarTarget.JavaScript, ScalarTarget.Python];
-            opt.Theme = ScalarTheme.Moon;
-        });
+        app.UseScalar();
     }
 
     app.UseSerilogRequestLogging();
-
+    
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
-
     app.Run();
 
     return 0;

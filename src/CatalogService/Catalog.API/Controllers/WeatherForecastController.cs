@@ -1,4 +1,5 @@
 using Catalog.Persistence.Repositories.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.API.Controllers;
@@ -19,6 +20,7 @@ public class WeatherForecastController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize]
     [HttpGet(Name = "GetWeatherForecast")]
     public Task<IEnumerable<WeatherForecast>> Get([FromServices]IClientRepository clientRepository)
     {
